@@ -5,7 +5,7 @@ services:
     ports:
       - "8101:8101"
     environment:
-      - DATABASE_URL=postgresql+psycopg2://kubsu:kubsu@db:5432/kubsu
+      - DATABASE_URL=postgresql+asyncpg://kubsu:kubsu@db:5432/kubsu
     depends_on:
       db:
         condition: service_healthy
