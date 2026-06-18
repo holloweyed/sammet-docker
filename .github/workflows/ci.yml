@@ -86,7 +86,7 @@ jobs:
             --name sammet-app \
             --network host \
             --restart unless-stopped \
-            -e DATABASE_URL=postgresql+psycopg://kubsu:kubsu@127.0.0.1:5432/kubsu \
+            -e DATABASE_URL=postgresql+psycopg2://kubsu:kubsu@127.0.0.1:5432/kubsu \
             localhost/sammet-app:latest
 
       - name: Verify container is running
