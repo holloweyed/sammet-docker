@@ -52,46 +52,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create network
-        run: |
-          podman network create sammet-network 2>/dev/null || true
-
       - name: Build image with Podman
         run: podman build -t localhost/sammet-app:latest .
 
-      - name: Stop and remove old containers
+      - name: Stop and remove old application container
         run: |
           podman rm -f sammet-app 2>/dev/null || true
-          podman rm -f sammet-db 2>/dev/null || true
-
-      - name: Start PostgreSQL container
-        run: |
-          podman run -d \
-            --name sammet-db \
-            --network sammet-network \
-            --restart unless-stopped \
-            -e POSTGRES_USER=kubsu \
-            -e POSTGRES_PASSWORD=kubsu \
-            -e POSTGRES_DB=kubsu \
-            -v pgdata:/var/lib/postgresql/data \
-            postgres:16-alpine
-
-      - name: Wait for PostgreSQL
-        run: |
-          for i in $(seq 1 30); do
-            podman exec sammet-db pg_isready -U kubsu -d kubsu && break
-            echo "Waiting for PostgreSQL... ($i/30)"
-            sleep 2
-          done
 
       - name: Start application container
         run: |
           podman run -d \
             --name sammet-app \
-            --network sammet-network \
+            --network host \
             --restart unless-stopped \
-            -p 8101:8101 \
-            -e DATABASE_URL=postgresql+asyncpg://kubsu:kubsu@sammet-db:5432/kubsu \
+            -e DATABASE_URL=postgresql+asyncpg://kubsu:kubsu@127.0.0.1:5432/kubsu \
             localhost/sammet-app:latest
 
       - name: Verify container is running
@@ -99,4 +73,3 @@ jobs:
           sleep 3
           podman ps --filter "name=sammet-app" --format "table {{.Names}}\t{{.Status}}"
           podman logs --tail 20 sammet-app
-          
