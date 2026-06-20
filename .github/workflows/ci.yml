@@ -73,3 +73,4 @@ jobs:
           sleep 3
           podman ps --filter "name=sammet-app" --format "table {{.Names}}\t{{.Status}}"
           podman logs --tail 20 sammet-app
+          
